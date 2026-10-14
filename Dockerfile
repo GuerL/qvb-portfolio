@@ -3,7 +3,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-ARG VITE_SITE_URL=https://guerl.dev
+ARG VITE_SITE_URL=https://qvb.dev
 ENV VITE_SITE_URL=$VITE_SITE_URL
 RUN npm run build
 

@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/components/projectvisual.tsx","./src/data/portfolio.test.ts","./src/data/portfolio.ts","./vite.config.ts"],"version":"5.9.3"}
+{"root":["./src/app.tsx","./src/main.tsx","./src/components/projectactions.tsx","./src/components/projectvisual.tsx","./src/components/screenshotgallery.tsx","./src/data/portfolio.test.ts","./src/data/portfolio.ts","./src/data/projectlinks.ts","./vite.config.ts"],"version":"5.9.3"}

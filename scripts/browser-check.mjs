@@ -20,5 +20,4 @@ await page.getByRole('button',{name:'Open navigation'}).click();await page.getBy
 await page.screenshot({path:'/tmp/portfolio-mobile.png',fullPage:true});
 await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await page.locator('.orbit-tag').first().evaluate(el=>getComputedStyle(el).animationName),'none');
 await page.setViewportSize({width:768,height:1024});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth));
-await page.goto(`${base}/og.svg`);await page.setViewportSize({width:1200,height:630});await page.screenshot({path:'public/og.png'});
 assert.deepEqual(errors,[]);await browser.close();console.log('Desktop, tablet, mobile, filters, all detail routes, 404, navigation, reduced motion: passed.');

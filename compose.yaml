@@ -5,7 +5,7 @@ services:
     build:
       context: .
       args:
-        VITE_SITE_URL: ${VITE_SITE_URL:-https://guerl.dev}
+        VITE_SITE_URL: ${VITE_SITE_URL:-https://qvb.dev}
     restart: unless-stopped
     ports:
       - "8085:8080"
