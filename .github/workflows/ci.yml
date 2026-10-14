@@ -15,6 +15,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint && npm test && npm run build
+      - run: npx playwright install --with-deps chromium
       - run: docker compose config --quiet
       - run: docker build -t qvb-portfolio:test .
       - name: Container smoke test
@@ -26,9 +27,7 @@ jobs:
           done
           curl -fsS http://127.0.0.1:18080/healthz
           curl -fsS http://127.0.0.1:18080/ | grep -q 'Quentin Van Bever'
-          for route in bifrost scopa-online whateverpeaks familylist echocue; do
-            curl -fsS "http://127.0.0.1:18080/projects/$route" | grep -q 'og:title'
-          done
+          PORTFOLIO_PREVIEW_URL=http://127.0.0.1:18080 CHECK_HTTP_404=1 npm run test:seo
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18080/missing)" = 404
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18080/assets/missing.js)" = 404
           curl -fsS http://127.0.0.1:18080/sitemap.xml | grep -q 'bifrost'

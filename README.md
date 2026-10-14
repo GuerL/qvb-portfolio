@@ -80,7 +80,7 @@ Vite copies `public/` into `dist/`; Docker copies all of `dist/` into Nginx. Reb
 
 The current `compose.yaml` has service `portfolio`, fixed container name `qvb-portfolio`, network alias `qvb-portfolio`, and host mapping **8085 → 8080**. These existing settings are preserved to avoid breaking your deployed origin. It joins external **apps-network**, uses a read-only runtime, bounded logs, `unless-stopped`, an unprivileged Nginx image and `/healthz`.
 
-The default canonical origin is now `https://qvb.dev` in Compose, Docker and metadata generation. For local custom builds, use `VITE_SITE_URL=https://qvb.dev npm run build`. Compose reads `.env`; make sure an old override does not still select another domain.
+The SEO canonical origin is fixed to `https://qvb.dev` in `src/data/seo.ts`, including preview builds. The existing `VITE_SITE_URL` build argument is retained for infrastructure compatibility; it does not override SEO URLs. See [SEO.md](SEO.md) for the audit, rendering approach, validation and deployment checks.
 
 On the existing deployment host:
 
@@ -116,7 +116,7 @@ Substitute an actual configured filename. Check the content type, load the image
 - `scripts/metadata.mjs`: per-route metadata, canonical links, sitemap, robots and 404.
 - `deploy/nginx.conf`: static route serving, security headers, media types and health endpoint.
 
-Known routes have individual generated HTML entry files. Unknown routes return HTTP 404 with the custom page. A future API should be a separate Java / Spring Boot service; none is needed for these improvements.
+Known routes have individual generated HTML entry files containing the existing React content, rendered at build time and hydrated in the browser. Unknown routes return HTTP 404 with the custom page. A future API should be a separate Java / Spring Boot service; none is needed for these improvements.
 
 ## Validation
 

@@ -6,3 +6,5 @@ dist/
 .idea/
 playwright-report/
 test-results/
+
+.seo-build/
