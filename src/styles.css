@@ -32,3 +32,5 @@
 }
 
 .game-concept{padding-bottom:24px}
+
+.footer-socials{display:flex;align-items:center;gap:4px}.footer-socials a{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:1px solid transparent;border-radius:6px;color:var(--text-secondary);transition:color .2s,background .2s,border-color .2s}.footer-socials a:hover,.footer-socials a:focus-visible{color:#c5c1f1;background:#20212e;border-color:#343444}.contact-links .button:focus-visible{border-color:#b1aaff}@media(max-width:700px){.contact-links .button{min-width:150px;min-height:48px}}

@@ -1,4 +1,4 @@
-import { projectLinks } from './projectLinks';
+import { base_domain, projectLinks } from './projectLinks';
 
 export type Status = 'Live' | 'In Development' | 'Experimental' | 'Archived';
 export interface Screenshot {
@@ -13,11 +13,21 @@ export interface Project {
   features: string[]; screenshots: Screenshot[]; githubUrl?: string; liveUrl?: string; websiteUrl?: string; thumbnail?: Screenshot; release?: Release;
   downloadUrl?: string; technicalHighlights: string[]; deployment: string;
 }
-// Contact links remain optional. Project destinations live in projectLinks.ts.
-export const profile = {
-  name: 'Quentin Van Bever', githubUrl: undefined as string | undefined,
-  linkedinUrl: undefined as string | undefined, email: undefined as string | undefined,
-  cvUrl: undefined as string | undefined,
+// Optional contact fields are hidden when no public destination is configured.
+export interface Profile {
+  name: string;
+  portfolioUrl: string;
+  githubUrl?: string;
+  linkedinUrl?: string;
+  email?: string;
+  cvUrl?: string;
+}
+export const profile: Profile = {
+  name: 'Quentin Van Bever',
+  portfolioUrl: `https://${base_domain}`,
+  githubUrl: 'https://github.com/GuerL',
+  linkedinUrl: 'https://www.linkedin.com/in/quentin-van-bever/',
+  email: 'vbquentin@gmail.com',
 };
 export const projects: Project[] = [
   { ...projectLinks.bifrost, id:'bifrost', slug:'bifrost', name:'Bifrost', tagline:'Your APIs. A better workspace.', category:'Desktop · Developer tools', description:'A desktop API client that brings requests, environments, imports and scripting into one focused workspace.', status:'In Development', featured:true, technologies:['Tauri','Rust','JavaScript'], features:['HTTP request management and multiple body formats','Environment and runtime variables','Import from cURL and OpenAPI / Swagger','Import capabilities for Postman, Bruno and Insomnia','JavaScript scripting','Dark and light themes'], screenshots:[], technicalHighlights:['A cross-platform-oriented desktop architecture with Tauri.','Bringing different API collection formats into a consistent request model.','Keeping request configuration, runtime variables and scripting understandable in one workspace.'], deployment:'Public releases and supported platforms have not been confirmed. The download action is disabled until a verified release URL is configured.' },
