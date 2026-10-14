@@ -1,0 +1,24 @@
+import { chromium } from '@playwright/test';
+import assert from 'node:assert/strict';
+const browser=await chromium.launch({channel:'chrome',headless:true});
+const errors=[];
+const base=process.env.PORTFOLIO_PREVIEW_URL || 'http://127.0.0.1:5173';
+const page=await browser.newPage({viewport:{width:1440,height:1000}});
+page.on('pageerror',e=>errors.push(e.message));
+await page.goto(`${base}/`);
+await page.screenshot({path:'/tmp/portfolio-desktop.png',fullPage:true});
+assert.equal(await page.locator('.project-card').count(),5);
+await page.getByRole('button',{name:'Desktop tools'}).click();
+assert.equal(await page.locator('.project-card').count(),2);
+await page.getByRole('button',{name:'Web applications'}).click();
+assert.equal(await page.locator('.project-card').count(),3);
+for(const slug of ['bifrost','scopa-online','whateverpeaks','familylist','echocue']){await page.goto(`${base}/projects/${slug}`);await page.locator('.detail h1').waitFor();assert.ok(await page.locator('.feature-list li').count());}
+await page.goto(`${base}/does-not-exist`);await page.getByRole('heading',{name:'A wrong turn. A new direction.'}).waitFor();
+await page.setViewportSize({width:390,height:844});await page.goto(`${base}/`);
+assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth));
+await page.getByRole('button',{name:'Open navigation'}).click();await page.getByRole('navigation').getByRole('link',{name:'About',exact:true}).click();assert.equal(await page.getByRole('button',{name:'Open navigation'}).getAttribute('aria-expanded'),'false');
+await page.screenshot({path:'/tmp/portfolio-mobile.png',fullPage:true});
+await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await page.locator('.orbit-tag').first().evaluate(el=>getComputedStyle(el).animationName),'none');
+await page.setViewportSize({width:768,height:1024});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth));
+await page.goto(`${base}/og.svg`);await page.setViewportSize({width:1200,height:630});await page.screenshot({path:'public/og.png'});
+assert.deepEqual(errors,[]);await browser.close();console.log('Desktop, tablet, mobile, filters, all detail routes, 404, navigation, reduced motion: passed.');

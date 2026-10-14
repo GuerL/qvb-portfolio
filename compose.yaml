@@ -1,0 +1,31 @@
+name: qvb-portfolio
+services:
+  portfolio:
+    build:
+      context: .
+      args:
+        VITE_SITE_URL: ${VITE_SITE_URL:-https://guerl.dev}
+    restart: unless-stopped
+    expose:
+      - "8080"
+    ports:
+      - "8085:8080"
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      apps-network:
+        aliases:
+          - ${PORTFOLIO_NETWORK_ALIAS:-portfolio}
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+networks:
+  apps-network:
+    external: true
