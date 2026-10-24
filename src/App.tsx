@@ -9,7 +9,7 @@ import { metadata, applyMetadata } from './data/seo';
 function External({href,children,className='',label}:{href:string|undefined;children:React.ReactNode;className?:string;label?:string}) { return href ? <a className={className} href={href} aria-label={label} target={href.startsWith('mailto:')?undefined:'_blank'} rel="noopener noreferrer">{children}</a> : null; }
 function ProjectMedia({project, hero = false}:{project:Project; hero?:boolean}) {
   const image = hero ? orderedScreenshots(project.screenshots)[0] ?? project.thumbnail : project.thumbnail ?? orderedScreenshots(project.screenshots)[0];
-  return image && validScreenshot(image) ? <div className={`project-image ${hero ? 'project-image-hero' : ''}`}><img src={image.src} alt={image.alt} width={image.width} height={image.height} loading={hero ? 'eager' : 'lazy'} decoding="async"/></div> : <ProjectVisual id={project.id} large={hero}/>;
+  return image && validScreenshot(image) ? <div className={`project-image ${hero ? 'project-image-hero' : ''}`}><img src={image.src} alt={image.alt} width={image.width} height={image.height} loading={hero ? 'eager' : 'lazy'} fetchPriority={hero ? 'high' : 'auto'} decoding="async"/></div> : <ProjectVisual id={project.id} large={hero}/>;
 }
 function ReleaseInfo({project}:{project:Project}) {
   if (project.id !== 'bifrost') return null;

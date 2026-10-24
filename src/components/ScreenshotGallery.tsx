@@ -38,7 +38,10 @@ export function ScreenshotGallery({ images, name }: { images: Screenshot[]; name
       <div className="lightbox-content">
         <div className="lightbox-header"><h3 id="lightbox-title">{name} <span>{index + 1} / {screenshots.length}</span></h3>
           <button ref={closeButton} onClick={close} aria-label="Close screenshot viewer" autoFocus><X size={22}/></button></div>
-        <img src={active.src} alt={active.alt} width={active.width} height={active.height}/>
+        <a className="lightbox-original" href={active.src} target="_blank" rel="noopener noreferrer" aria-label="Open screenshot at full resolution in a new tab">
+          <img src={active.src} alt={active.alt} width={active.width} height={active.height}/>
+        </a>
+        <a className="lightbox-original-link" href={active.src} target="_blank" rel="noopener noreferrer">Open full-resolution image ↗</a>
         <div className="lightbox-controls"><button onClick={() => move(-1)} aria-label="Previous screenshot" disabled={screenshots.length < 2}><ChevronLeft size={22}/></button>
           <p id="lightbox-caption" aria-live="polite">{active.caption || active.alt}</p>
           <button onClick={() => move(1)} aria-label="Next screenshot" disabled={screenshots.length < 2}><ChevronRight size={22}/></button></div>
