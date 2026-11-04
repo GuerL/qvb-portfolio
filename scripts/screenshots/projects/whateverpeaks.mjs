@@ -2,6 +2,7 @@ import { expect } from '@playwright/test';
 import { demoReady } from '../readiness.mjs';
 
 async function landing({ page }) {
+  await demoReady(page);
   await expect(page.getByRole('heading', { name: 'WhateverPeaks.' })).toBeVisible();
   await expect(page.getByRole('img', { name: 'qvb.', exact: true })).toBeVisible();
   await expect(page.getByRole('status')).toHaveText('Multiplayer connects when you create or join a game');

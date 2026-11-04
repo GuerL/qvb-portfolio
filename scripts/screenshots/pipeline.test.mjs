@@ -32,6 +32,7 @@ test('canonical mappings match existing gallery assets and previews', async () =
     assert.equal(basename(scene.preview), scene.output);
     assert.equal(basename(scene.destination), scene.output);
     assert.equal(typeof scene.capture, 'function');
+    assert.equal(scene.path, `./?screenshot=${scene.id}`);
   }
 });
 
@@ -45,7 +46,9 @@ test('capture/publish isolation, filters, dimensions and invalid input safety', 
     response.setHeader('Content-Type', 'text/html');
     const scene = new URL(request.url, 'http://localhost').searchParams.get('screenshot');
     if (scene) {
-      const content = scopa
+      const content = scene.startsWith('landing')
+        ? `<h1>${scopa ? 'Scopa Online.' : 'WhateverPeaks.'}</h1><img alt="qvb." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='36'%3E%3C/svg%3E"><span class="title-dot">.</span><div role="status">${scopa ? 'Online' : 'Multiplayer connects when you create or join a game'}</div><label>Playing as<input></label><button>${scopa ? 'Create Room' : 'Create Game'}</button><button>${scopa ? 'Join Room' : 'Join Game'}</button>`
+        : scopa
         ? scene === 'lobby' ? '<h1>SCOPA7</h1><div class="players"><span>Sofia</span><span>Marco</span></div>'
           : scene === 'results' ? '<h1>Round 2</h1><span>Sofia</span><span>Marco</span><span>Settebello</span><button>Next round</button>'
           : '<span>Sofia</span><span>Marco</span><section aria-label="Scopa game board">Board</section><section aria-label="Table cards"><button></button><button></button><button></button><button></button></section>'
@@ -55,7 +58,7 @@ test('capture/publish isolation, filters, dimensions and invalid input safety', 
       response.end(`<html><body><div id="root" ${fault === 'readiness' ? '' : 'data-screenshot-ready="true"'}>${content}${fault === 'javascript' ? '<script>throw new Error("fixture failure")</script>' : ''}${fault === 'image' ? '<img src="/unavailable/image">' : ''}${fault === 'overflow' ? '<div style="width:2000px">Overflow</div>' : ''}</div></body></html>`);
       return;
     }
-    response.end(`<html><body><h1>${scopa ? 'Scopa Online.' : 'WhateverPeaks.'}</h1><img alt="qvb." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='36'%3E%3C/svg%3E"><span class="title-dot">.</span><div role="status">${scopa ? 'Online' : 'Multiplayer connects when you create or join a game'}</div><label>Playing as<input></label><button>${scopa ? 'Create Room' : 'Create Game'}</button><button>${scopa ? 'Join Room' : 'Join Game'}</button></body></html>`);
+    response.end('<html><body>Server available; select a screenshot fixture.</body></html>');
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   try {
@@ -109,6 +112,16 @@ test('capture/publish isolation, filters, dimensions and invalid input safety', 
     await run('publish.mjs', '--project=scopa', '--scene=gameplay');
     assert.deepEqual(await readFile(join(publicDir, 'cover.webp')), coverPreview);
     assert.deepEqual(await readFile(join(publicDir, 'landing.webp')), before);
+    fault = 'readiness';
+    for (const project of ['scopa', 'whateverpeaks']) {
+      for (const scene of ['landing', 'landing-mobile']) {
+        const retained = join(temporary, `.screenshots-preview/${project}/${scene}.webp`);
+        const previous = await readFile(retained);
+        await assert.rejects(run('capture.mjs', `--project=${project}`, `--scene=${scene}`), /Demo readiness was not reached/);
+        assert.deepEqual(await readFile(retained), previous);
+        await assert.rejects(run('publish.mjs', `--project=${project}`, `--scene=${scene}`), /capture failed or was interrupted/);
+      }
+    }
     const validCover = await readFile(join(temporary, '.screenshots-preview/scopa/cover.webp'));
     for (const failure of ['readiness', 'javascript', 'image', 'overflow']) {
       fault = failure;

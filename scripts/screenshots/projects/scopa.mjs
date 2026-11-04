@@ -2,6 +2,7 @@ import { expect } from '@playwright/test';
 import { demoReady } from '../readiness.mjs';
 
 async function landing({ page }) {
+  await demoReady(page);
   await expect(page.getByRole('heading', { name: 'Scopa Online.' })).toBeVisible();
   await expect(page.getByRole('img', { name: 'qvb.', exact: true })).toBeVisible();
   await expect(page.locator('.title-dot')).toHaveText('.');

@@ -22,10 +22,14 @@ including on errors, SIGINT and SIGTERM. Existing processes are left running. It
 never starts a normal development or production server. Existing servers must also
 use screenshots mode; demo readiness will fail on a normal server.
 
-Scopa landing views retain Phase 1's real `Online` health assertion and require its
-backend/health proxy to be available. The eight demo scenes require only the
-screenshot frontends. WhateverPeaks landing retains its truthful initial multiplayer
-status. The pipeline does not start backends or databases.
+All twelve scenes use deterministic development fixtures through
+`/?screenshot=<scene>`, including `landing` and `landing-mobile`. No Spring Boot
+backend or database is required. Both frontends must provide all six fixture IDs,
+including `landing` and `landing-mobile`; older fixture implementations that omit
+them must be updated in their owning repository before capture can succeed.
+Scopa's landing fixture displays `Online` without
+performing a real backend health check. WhateverPeaks retains its initial multiplayer
+status. Every capture waits for the fixture's readiness signal before saving.
 
 Environment variables (export explicitly; no implicit `.env` loading):
 
@@ -41,8 +45,8 @@ errors. Browser installation on Linux may require `npx playwright install --with
 
 | Project | Scene | URL path | Preview / destination filename | Viewport |
 | --- | --- | --- | --- | --- |
-| Both | landing | / | landing.webp | 1600×900 |
-| Both | landing-mobile | / | landing-mobile.webp | 390×844 |
+| Both | landing | /?screenshot=landing | landing.webp | 1600×900 |
+| Both | landing-mobile | /?screenshot=landing-mobile | landing-mobile.webp | 390×844 |
 | Scopa | gameplay | /?screenshot=gameplay | cover.webp | 1600×900 |
 | Scopa | lobby | /?screenshot=lobby | lobby.webp | 1600×900 |
 | Scopa | results | /?screenshot=results | results.webp | 1600×900 |

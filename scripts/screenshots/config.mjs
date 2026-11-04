@@ -31,7 +31,7 @@ export const sceneConfig = {
 export const projects = [scopa, whateverpeaks].map(project => ({
   ...project,
   scenes: sceneConfig[project.id].map(scene => ({
-    ...scene, path: scene.id.startsWith('landing') ? './' : `./?screenshot=${scene.id}`, capture: project.captures[scene.id],
+    ...scene, path: `./?screenshot=${scene.id}`, capture: project.captures[scene.id],
   })),
 }));
 export function selectScenes(args = process.argv.slice(2)) {
