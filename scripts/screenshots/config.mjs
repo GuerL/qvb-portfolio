@@ -9,8 +9,7 @@ export const viewports = {
   desktop: { width: 1600, height: 900 },
   mobile: { width: 390, height: 844 },
 };
-// Single source of truth for scene IDs, framing and filenames. Reserved Phase 2
-// scenes cannot be captured or published until their project strategy exists.
+// Single source of truth for scene IDs, framing and explicit filenames.
 export const sceneConfig = {
   scopa: [
     { id: 'landing', viewport: 'desktop', output: 'landing.webp' },
@@ -32,7 +31,7 @@ export const sceneConfig = {
 export const projects = [scopa, whateverpeaks].map(project => ({
   ...project,
   scenes: sceneConfig[project.id].map(scene => ({
-    ...scene, path: './', capture: project.captures[scene.id],
+    ...scene, path: scene.id.startsWith('landing') ? './' : `./?screenshot=${scene.id}`, capture: project.captures[scene.id],
   })),
 }));
 export function selectScenes(args = process.argv.slice(2)) {
@@ -44,7 +43,7 @@ export function selectScenes(args = process.argv.slice(2)) {
   }
   const scenes = projects.flatMap(project => project.scenes.map(scene => ({
     ...scene, project: project.id, url: project.url, env: project.env,
-    viewport: viewports[scene.viewport],
+    viewport: viewports[scene.viewport], frontendEnv: project.frontendEnv,
     preview: resolve(previewRoot, project.id, scene.output),
     destination: resolve(root, 'public/images/projects', project.id, scene.output),
   }))).filter(scene => (!filters.project || scene.project === filters.project) && (!filters.scene || scene.id === filters.scene));

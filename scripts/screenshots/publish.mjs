@@ -1,4 +1,5 @@
 import { readFile, mkdir, writeFile, rename, rm } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { selectScenes } from './config.mjs';
 import { validateWebp } from './images.mjs';
@@ -9,6 +10,7 @@ async function main() {
   for (const scene of selectScenes()) {
     let buffer;
     try {
+      if (existsSync(`${scene.preview}.pending`)) throw new Error('Last capture failed or was interrupted; retained preview is blocked');
       buffer = await readFile(scene.preview);
       await validateWebp(buffer, scene.viewport);
     } catch (error) {

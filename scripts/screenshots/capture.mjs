@@ -4,11 +4,17 @@ import { mkdir, writeFile, rename, rm } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { selectScenes } from './config.mjs';
 import { validateWebp } from './images.mjs';
+import { resourcesReady } from './readiness.mjs';
+import { startServers } from './servers.mjs';
 
 async function main() {
   const scenes = selectScenes();
-  // Invalidate selected old previews before starting: failed runs cannot publish stale files.
-  for (const scene of scenes) await rm(scene.preview, { force: true });
+  // A failed/interrupted attempt retains the image but blocks stale publishing.
+  for (const scene of scenes) {
+    await mkdir(dirname(scene.preview), { recursive: true });
+    await writeFile(`${scene.preview}.pending`, 'Capture incomplete. Recapture this scene before publishing.');
+  }
+  const stopServers = await startServers(scenes);
   const failures = [];
   let browser;
   try {
@@ -27,6 +33,7 @@ async function main() {
         context = await browser.newContext({ viewport: scene.viewport, deviceScaleFactor: 1, locale: 'en-US', timezoneId: 'UTC', colorScheme: 'dark', reducedMotion: 'reduce' });
         const page = await context.newPage();
         page.setDefaultTimeout(15000);
+        page.setDefaultNavigationTimeout(30000);
         const errors = [];
         page.on('pageerror', error => errors.push(error.message));
         page.on('requestfailed', request => errors.push(`${request.method()} ${request.url()}: ${request.failure()?.errorText}`));
@@ -35,18 +42,13 @@ async function main() {
         if (!response?.ok()) throw new Error(`Navigation failed: ${response?.status()}`);
         // Strategies may create additional contexts/pages for Phase 2 and register cleanup with try/finally.
         await scene.capture({ page, context, browser, scene });
-        await page.evaluate(async () => {
-          await document.fonts.ready;
-          await Promise.all([...document.images].map(async image => {
-            await image.decode();
-            if (!image.naturalWidth) throw new Error(`Image failed: ${image.src}`);
-          }));
-        });
-        const fitsViewport = await page.evaluate(() => {
-          const documentElement = document.documentElement;
-          return documentElement.scrollWidth <= innerWidth && documentElement.scrollHeight <= innerHeight;
-        });
-        if (!fitsViewport) throw new Error('Interface overflows the fixed viewport. Check responsive layout before capture; images are never resized to fit.');
+        let resourceTimer;
+        try {
+          await Promise.race([
+            resourcesReady(page, scene.viewport),
+            new Promise((_, reject) => { resourceTimer = setTimeout(() => reject(new Error('Fonts or images did not finish loading within 15 seconds')), 15000); }),
+          ]);
+        } finally { clearTimeout(resourceTimer); }
         const visibleErrors = page.locator('[role="alert"], vite-error-overlay, .toast, .error');
         for (const element of await visibleErrors.all()) {
           if (await element.isVisible()) throw new Error(`Visible application error: ${await element.textContent()}`);
@@ -60,15 +62,17 @@ async function main() {
         await mkdir(dirname(scene.preview), { recursive: true });
         await writeFile(`${scene.preview}.tmp`, webp);
         await rename(`${scene.preview}.tmp`, scene.preview);
+        await rm(`${scene.preview}.pending`, { force: true });
         console.log(`Captured ${scene.project}/${scene.id}: ${scene.preview}`);
       } catch (error) {
         failures.push(`${scene.project}/${scene.id}: ${error.message}`);
       } finally {
         await context?.close();
+        await rm(`${scene.preview}.tmp`, { force: true });
       }
     }
   } finally {
-    await browser?.close();
+    try { await browser?.close(); } finally { await stopServers(); }
   }
   if (failures.length) throw new Error(failures.join('\n'));
 }
