@@ -11,7 +11,7 @@ npm run screenshots
 npm run screenshots -- --project=scopa
 npm run screenshots -- --project=whateverpeaks --scene=landing
 npm run screenshots -- --scene=landing-mobile
-# Inspect the selected .screenshots-preview/<project>/<scene>.webp files first.
+# Inspect the selected .screenshots-preview/<project>/<configured output filename> files first.
 npm run screenshots:publish -- --project=scopa --scene=landing
 npm run screenshots:publish
 ```
@@ -28,6 +28,10 @@ Scopa requires the real Online health status. WhateverPeaks starts directly on i
 multiplayer landing screen; its truthful initial status says that multiplayer connects
 when creating/joining a game. Landing capture does not create a room or claim a live
 multiplayer connection. Fresh browser contexts prevent persisted Continue/rejoin states.
+
+Scene IDs, viewports and explicit output filenames live in `config.mjs`. Project modules
+contain URL configuration and capture strategies only. Previews and published assets
+use the same configured output filename, never a filename inferred from the scene ID.
 
 Both projects map `landing` to `landing.webp` (1600×900) and `landing-mobile` to
 `landing-mobile.webp` (390×844), at scale 1. Capture preserves the fixed visible viewport,
@@ -61,16 +65,32 @@ real applications are available or healthy.
   fixture startup in production; never expose public state-mutation routes. Add tests
   proving production builds cannot register these handlers. Keep fixtures owned by each
   app repo; orchestrate through documented local APIs, without source dependencies.
-- Add scene entries in each project module: unique `id`, `viewport`, `path`, `capture`,
-  `output`. URL comes from the project environment configuration. No runner changes needed.
+- The canonical Phase 2 scene mappings already exist in `config.mjs` (listed below).
+  They are skipped by default and explicitly rejected by filtered capture/publish commands
+  until a matching function is added to the project module’s `captures` object.
+  Add new scene IDs, viewports and outputs only in `config.mjs`; URL comes from the
+  project environment configuration. No runner or publisher changes are needed.
   Async strategies receive `{ page, context, browser, scene }`; create isolated extra
   contexts for the second player, verify real socket/player readiness, and close extra
   contexts/reset fixtures with `try/finally`.
 - Map Scopa `gameplay` → `cover.webp`, `lobby` → `lobby.webp`, `results` → `results.webp`,
   `mobile-gameplay` → `mobile-gameplay.webp`. Map WhateverPeaks `gameplay` → `cover.webp`,
   `competition` → `competition.webp`, `lobby` → `lobby.webp`, `results` → `results.webp`.
-  Cover replacement must be explicitly introduced in those scene entries.
+  Only the gameplay strategy can activate the existing cover mapping; landing scenes
+  retain separate filenames and never replace gameplay assets.
 - Assert exact fixture identity, player count, connected state, deck and results before
   capture. Verify desktop/mobile framing, repeated-run consistency, cleanup and filtering.
 - When replacing gallery assets, update their width/height metadata in
   `src/data/portfolio.ts` to the scene dimensions and run gallery browser checks.
+
+## Existing PNG originals
+
+Gallery references use WebP. These unreferenced project PNG originals are retained for
+manual cleanup only (no PNGs are deleted or renamed by the pipeline):
+
+- Scopa: `cover.png`, `gameplay-mobile.png`, `lobby.png`, `results.png`.
+- WhateverPeaks: `cover.png`, `competition.png`, `lobby.png`, `results.png`.
+- Bifrost (unchanged): `cover.png`, `environment.png`, `import.png`,
+  `request-editor.png`, `response-viewer.png`.
+
+`public/og.png` is referenced by SEO metadata and must be retained.

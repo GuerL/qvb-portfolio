@@ -7,8 +7,31 @@ import { join } from 'node:path';
 import { promisify } from 'node:util';
 import { execFile } from 'node:child_process';
 import sharp from 'sharp';
-import { root } from './config.mjs';
+import { root, projects, sceneConfig, selectScenes } from './config.mjs';
+import { basename } from 'node:path';
 const exec = promisify(execFile);
+
+test('canonical mappings match existing gallery assets and previews', async () => {
+  const expected = {
+    scopa: ['cover.webp', 'lobby.webp', 'results.webp', 'mobile-gameplay.webp'],
+    whateverpeaks: ['cover.webp', 'competition.webp', 'lobby.webp', 'results.webp'],
+  };
+  const gallery = await readFile(join(root, 'src/data/portfolio.ts'), 'utf8');
+  for (const project of projects) {
+    const canonical = sceneConfig[project.id].filter(scene => !scene.id.startsWith('landing'));
+    assert.deepEqual(canonical.map(scene => scene.output), expected[project.id]);
+    for (const scene of canonical) {
+      const asset = `/images/projects/${project.id}/${scene.output}`;
+      assert.ok(gallery.includes(`src:'${asset}'`), asset);
+      assert.equal((await sharp(join(root, 'public', asset)).metadata()).format, 'webp');
+    }
+  }
+  for (const scene of selectScenes([])) {
+    assert.equal(basename(scene.preview), scene.output);
+    assert.equal(basename(scene.destination), scene.output);
+    assert.notEqual(scene.output, 'cover.webp');
+  }
+});
 
 test('capture/publish isolation, filters, dimensions and invalid input safety', async () => {
   const temporary = await mkdtemp(join(tmpdir(), 'portfolio-screenshots-'));
@@ -30,6 +53,8 @@ test('capture/publish isolation, filters, dimensions and invalid input safety', 
     const publicDir = join(temporary, 'public/images/projects/scopa');
     await mkdir(publicDir, { recursive: true });
     await writeFile(join(publicDir, 'cover.webp'), 'preserved cover');
+    await assert.rejects(run('capture.mjs', '--project=scopa', '--scene=gameplay'), /Phase 2 capture strategy/);
+    await assert.rejects(run('publish.mjs', '--project=scopa', '--scene=gameplay'), /Phase 2 capture strategy/);
     await run('capture.mjs', '--project=scopa', '--scene=landing');
     assert.deepEqual(await readdir(join(temporary, '.screenshots-preview/scopa')), ['landing.webp']);
     assert.deepEqual(await readdir(publicDir), ['cover.webp']);
@@ -61,6 +86,19 @@ test('capture/publish isolation, filters, dimensions and invalid input safety', 
     env.SCOPA_URL = `${base}/unavailable/`;
     await assert.rejects(run('capture.mjs', '--project=scopa', '--scene=landing'), /Application unavailable/);
     await assert.rejects(readFile(preview), /ENOENT/);
+    assert.deepEqual(await readFile(join(publicDir, 'landing.webp')), before);
+    // Simulate a future strategy in the isolated copy. The runner/publisher must
+    // use cover.webp, despite the different scene ID gameplay.
+    const projectFile = join(temporary, 'scripts/screenshots/projects/scopa.mjs');
+    const source = await readFile(projectFile, 'utf8');
+    await writeFile(projectFile, source.replace('captures: { landing,', 'captures: { gameplay: landing, landing,'));
+    env.SCOPA_URL = `${base}/scopa/`;
+    await run('capture.mjs', '--project=scopa', '--scene=gameplay');
+    const coverPreview = await readFile(join(temporary, '.screenshots-preview/scopa/cover.webp'));
+    await assert.rejects(readFile(join(temporary, '.screenshots-preview/scopa/gameplay.webp')), /ENOENT/);
+    assert.equal(await readFile(join(publicDir, 'cover.webp'), 'utf8'), 'preserved cover');
+    await run('publish.mjs', '--project=scopa', '--scene=gameplay');
+    assert.deepEqual(await readFile(join(publicDir, 'cover.webp')), coverPreview);
     assert.deepEqual(await readFile(join(publicDir, 'landing.webp')), before);
   } finally {
     await new Promise(resolve => server.close(resolve));

@@ -11,8 +11,5 @@ async function landing({ page }) {
 }
 export default {
   id: 'whateverpeaks', env: 'WHATEVERPEAKS_URL', url: process.env.WHATEVERPEAKS_URL || 'http://localhost:3000',
-  scenes: [
-    { id: 'landing', viewport: 'desktop', path: './', capture: landing, output: 'landing.webp' },
-    { id: 'landing-mobile', viewport: 'mobile', path: './', capture: landing, output: 'landing-mobile.webp' },
-  ],
+  captures: { landing, 'landing-mobile': landing },
 };

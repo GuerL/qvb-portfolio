@@ -11,8 +11,5 @@ async function landing({ page }) {
 }
 export default {
   id: 'scopa', env: 'SCOPA_URL', url: process.env.SCOPA_URL || 'http://localhost:8082',
-  scenes: [
-    { id: 'landing', viewport: 'desktop', path: './', capture: landing, output: 'landing.webp' },
-    { id: 'landing-mobile', viewport: 'mobile', path: './', capture: landing, output: 'landing-mobile.webp' },
-  ],
+  captures: { landing, 'landing-mobile': landing },
 };
