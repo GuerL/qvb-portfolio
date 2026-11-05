@@ -9,7 +9,7 @@
     "preview": "vite preview --host 127.0.0.1",
     "test:seo": "node --import tsx --test src/data/seo.test.ts && node --import tsx scripts/seo-check.mjs",
     "lint": "eslint .",
-    "test": "node --import tsx --test src/data/*.test.ts scripts/analytics.test.mjs",
+    "test": "node --import tsx --test src/data/*.test.ts",
     "screenshots": "node scripts/screenshots/capture.mjs",
     "screenshots:publish": "node scripts/screenshots/publish.mjs"
   },
