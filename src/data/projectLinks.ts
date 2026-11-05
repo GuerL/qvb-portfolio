@@ -7,6 +7,7 @@ export interface ProjectLinks {
 export const base_domain = "qvb.dev";
 
 export const projectLinks = {
+  gryd: {},
   scopa: {
     liveUrl: `https://scopa.${base_domain}`,
     githubUrl: "",

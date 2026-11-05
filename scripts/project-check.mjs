@@ -16,14 +16,14 @@ await page.route('**/src/data/portfolio.ts',async route=>{
   ]; projects[0].thumbnail = projects[0].screenshots[1];
   projects[0].downloadUrl='https://example.com/download'; projects[0].githubUrl='https://example.com/repo'; projects[0].websiteUrl='https://example.com/product';
   projects[0].release={version:'test-only',platforms:['Test platform']};
-  projects[1].liveUrl='https://example.com/scopa'; projects[2].liveUrl='https://example.com/peaks';`;
+  projects.find(p=>p.id==='scopa').liveUrl='https://example.com/scopa'; projects.find(p=>p.id==='peaks').liveUrl='https://example.com/peaks';`;
   assert.ok(body.includes('export const skillGroups'));
   await route.fulfill({response,body:body.replace('export const skillGroups',setup+'\nexport const skillGroups')});
 });
 await page.route('**/images/projects/bifrost/fixture-*.webp',route=>route.fulfill({contentType:'image/png',body:readFileSync('public/og.png')}));
 await page.goto(base);
 await page.locator('.project-card').first().waitFor();
-assert.equal(await page.locator('.project-action-area').count(),5);
+assert.equal(await page.locator('.project-action-area').count(),6);
 assert.equal(await page.getByRole('link',{name:'Play Now'}).count(),2);
 assert.equal(await page.locator('.project-family .project-actions a').count(),0);
 for(const link of await page.locator('.project-actions a').all()){

@@ -12,7 +12,7 @@ test('project-specific CTA labels and priorities match their distribution model'
   assert.deepEqual(projectActions(base).map(a=>a.label),['Download','GitHub','Website']);
   for(const id of ['scopa','peaks']) assert.equal(projectActions({...base,id})[0].label,'Play Now');
   assert.equal(projectActions({...base,id:'echo'}).some(a=>a.primary),false);
-  assert.equal(projectActions({...projects[3],liveUrl:undefined,downloadUrl:undefined}).length,0);
+  assert.equal(projectActions({...projects.find(p=>p.id==='family')!,liveUrl:undefined,downloadUrl:undefined}).length,0);
   assert.equal(projectActions({...base,downloadUrl:'javascript:alert(1)',githubUrl:undefined,websiteUrl:undefined})[0].href,undefined);
 });
 test('gallery accepts local assets with dimensions and stable display ordering',async()=>{
