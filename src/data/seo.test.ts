@@ -45,5 +45,7 @@ test('GRYD shares floor-planning metadata across search and social tags', () => 
   const tags = Object.fromEntries(metaEntries(seo).map(([, key, value]) => [key, value]));
   for (const key of ['og:title', 'twitter:title']) assert.equal(tags[key], seo.title);
   for (const key of ['description', 'og:description', 'twitter:description']) assert.equal(tags[key], seo.description);
-  assert.equal(seo.jsonLd['@graph'][0].description, projects.find(project => project.id === 'gryd')!.description);
+  const projectNode = seo.jsonLd['@graph'][0];
+  assert.ok('description' in projectNode);
+  assert.equal(projectNode.description, projects.find(project => project.id === 'gryd')!.description);
 });
