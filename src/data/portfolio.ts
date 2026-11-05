@@ -1,4 +1,4 @@
-import { base_domain, projectLinks } from './projectLinks';
+import { base_domain, projectLinks, type ProjectLinks } from './projectLinks';
 
 export type Status = 'Live' | 'In Development' | 'Experimental' | 'Archived';
 export interface Screenshot {
@@ -7,7 +7,7 @@ export interface Screenshot {
 }
 export interface Release { version?: string; platforms: string[] }
 
-export interface Project {
+export interface Project extends ProjectLinks {
   id: string; slug: string; name: string; tagline: string; description: string;
   intro?: string; longDescription?: string; platforms?: string[]; seo?: { title: string; description: string };
   status: Status; featured: boolean; cardSize?: 'featured' | 'medium'; category: string; technologies: string[];
@@ -70,7 +70,7 @@ export const projects: Project[] = [
       'Interactive Walkthrough — Move through the designed environment and explore rooms from a first-person perspective.',
       'Native Project Format — Save and reopen projects using the .gryd format, supporting project portability without requiring iCloud.',
     ],
-    screenshots:[], technicalHighlights:[], deployment:'In development for iPhone and iPad. No public release is currently available.',
+    screenshots:[], technicalHighlights:[], deployment:'In development for iPhone and iPad. Public Beta available through Apple TestFlight.',
     seo:{ title:'GRYD — 2D & 3D Floor Planning | qvb.dev', description:'GRYD is a 2D and 3D floor-planning application for iPhone and iPad. Design with Apple Pencil or touch, furnish rooms, and explore interactive 3D spaces.' },
   },
   { ...projectLinks.scopa, cardSize:'medium', id:'scopa', slug:'scopa-online', name:'Scopa Online', tagline:'A classic game. A shared table.', category:'Web · Multiplayer', description:'The Italian card game, brought online. Create a room, join the table and play together in real time.', status:'In Development', featured:true, technologies:['React','Spring Boot','WebSockets','Docker'],features:['Create and join multiplayer rooms','Real-time gameplay','Responsive mobile interface','Custom Scopa rules'],thumbnail:scopaScreenshots[0],screenshots:scopaScreenshots,technicalHighlights:['Coordinating shared match state between a Spring Boot server and React clients.','Representing custom game rules and room lifecycle in the application.','Designing a card table that works on small touch screens.'],deployment:'Play Scopa Online at scopa.qvb.dev.' },
@@ -105,7 +105,7 @@ export function orderedScreenshots(images: Screenshot[]): Screenshot[] {
 }
 export interface ProjectAction {
   label: string; href?: string; primary: boolean;
-  kind: 'live' | 'download' | 'github' | 'website';
+  kind: 'live' | 'download' | 'github' | 'website' | 'beta';
   missingMessage?: string;
 }
 export function projectActions(project: Project): ProjectAction[] {
@@ -123,6 +123,7 @@ export function projectActions(project: Project): ProjectAction[] {
     add('live','Open FamilyList',project.liveUrl,true);
     add('download','Download FamilyList',project.downloadUrl,!publicUrl(project.liveUrl));
   }
+  add('beta','Join the Beta',project.betaUrl,true);
   add('github','GitHub',project.githubUrl,false);
   add('website','Website',project.websiteUrl,false);
   return actions;

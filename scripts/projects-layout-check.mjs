@@ -32,13 +32,36 @@ try {
         assert.ok(boxes[i].y >= boxes[i - 1].y + boxes[i - 1].height);
       }
     }
-    assert.equal(await page.locator('.project-gryd .project-actions a').count(), 0);
+    const cardBeta = page.locator('.project-gryd').getByRole('link', { name: 'Join the Beta' });
+    assert.equal(await cardBeta.getAttribute('href'), 'https://testflight.apple.com/join/nHgBya72');
+    assert.ok(await cardBeta.evaluate(el => el.classList.contains('secondary')));
+    assert.equal(await cardBeta.getAttribute('target'), '_blank');
+    assert.equal(await cardBeta.getAttribute('rel'), 'noopener noreferrer');
+    assert.equal(await page.locator('a a, a button, button a, button button').count(), 0);
+    await cardBeta.focus();
+    assert.ok(await cardBeta.evaluate(el => el === document.activeElement));
+    await page.context().route('https://testflight.apple.com/**', route => route.fulfill({ body: 'TestFlight destination fixture' }));
+    const homeUrl = page.url();
+    const popupPromise = page.waitForEvent('popup');
+    await cardBeta.press('Enter');
+    const popup = await popupPromise;
+    await popup.waitForLoadState();
+    assert.equal(popup.url(), 'https://testflight.apple.com/join/nHgBya72');
+    assert.equal(page.url(), homeUrl);
+    await popup.close();
     for (const image of await cards.locator('img').all()) {
       assert.equal(await image.evaluate(el => getComputedStyle(el).objectFit), 'contain');
     }
     if (width === 1440) await page.locator('#projects').screenshot({ path: '/tmp/portfolio-projects-desktop.png' });
     await page.getByRole('link', { name: 'Explore GRYD', exact: true }).click();
     await page.getByRole('heading', { name: 'GRYD.', exact: true }).waitFor();
+    const heroBeta = page.locator('.detail-heading').getByRole('link', { name: 'Join the Beta' });
+    assert.equal(await heroBeta.getAttribute('href'), 'https://testflight.apple.com/join/nHgBya72');
+    assert.equal(await heroBeta.getAttribute('target'), '_blank');
+    assert.equal(await heroBeta.getAttribute('rel'), 'noopener noreferrer');
+    assert.ok(await heroBeta.evaluate(el => el.classList.contains('primary')));
+    assert.equal(await page.locator('a a, a button, button a, button button').count(), 0);
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     await page.getByRole('link', { name: 'All projects', exact: true }).click();
     await page.locator('#projects').waitFor();
     await page.getByRole('button', { name: 'Web applications' }).click();

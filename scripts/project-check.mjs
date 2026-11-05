@@ -7,7 +7,7 @@ const page=await browser.newPage({viewport:{width:1440,height:1000}});
 const errors=[];
 page.on('pageerror',error=>errors.push(error.message));
 // Exercise optional media/actions with explicit test fixtures; nothing is written to product content.
-await page.route('**/src/data/portfolio.ts',async route=>{
+await page.route(/\/src\/data\/portfolio\.ts(?:\?.*)?$/,async route=>{
   const response=await route.fetch();
   const body=await response.text();
   const setup=`projects[0].screenshots = [

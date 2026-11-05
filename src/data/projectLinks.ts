@@ -1,4 +1,5 @@
 export interface ProjectLinks {
+  betaUrl?: string;
   liveUrl?: string;
   websiteUrl?: string;
   githubUrl?: string;
@@ -7,7 +8,7 @@ export interface ProjectLinks {
 export const base_domain = "qvb.dev";
 
 export const projectLinks = {
-  gryd: {},
+  gryd: { betaUrl: "https://testflight.apple.com/join/nHgBya72" },
   scopa: {
     liveUrl: `https://scopa.${base_domain}`,
     githubUrl: "",
