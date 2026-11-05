@@ -54,3 +54,7 @@
   .project-size-small .project-image,.project-size-small .project-visual{height:200px}
 }
 @media(max-width:700px){.project-size-featured{display:block}}
+
+.gryd-design-icons{display:flex;align-items:center;gap:20px}
+.project-info .project-tagline{color:#c5c1f1;margin-bottom:10px}
+.detail-heading .project-intro{font-size:var(--text-body);max-width:70ch}

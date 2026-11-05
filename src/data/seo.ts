@@ -18,9 +18,9 @@ export function metadata(path: string) {
   const home = path === '/' || path === '/projects';
   const canonical = `${site.origin}${home ? '/' : path}`;
   const title = home ? 'Quentin Van Bever | Software Engineer & Product Builder'
-    : project ? `${project.name} — ${projectLabel(project)} | Quentin Van Bever` : 'Page not found | Quentin Van Bever';
+    : project ? project.seo?.title ?? `${project.name} — ${projectLabel(project)} | Quentin Van Bever` : 'Page not found | Quentin Van Bever';
   const description = home ? 'Software engineer specializing in Java, Spring Boot, React and full-stack development. Explore Bifrost, Scopa Online, WhateverPeaks and other software projects.'
-    : project ? `${project.description} Built with ${project.technologies.join(', ')} by Quentin Van Bever.` : 'This page does not exist. Explore software projects by Quentin Van Bever.';
+    : project ? project.seo?.description ?? `${project.description} Built with ${project.technologies.join(', ')} by Quentin Van Bever.` : 'This page does not exist. Explore software projects by Quentin Van Bever.';
   const graph = home ? [person, { '@type': 'WebSite', '@id': `${site.origin}/#website`, url: `${site.origin}/`, name: 'Quentin Van Bever', author: { '@id': person['@id'] } }]
     : project ? [{ '@type': 'CreativeWork', '@id': `${canonical}#project`, url: canonical, name: project.name, description: project.description, author: person, keywords: project.technologies.join(', '), image: site.image }] : [];
   // CreativeWork describes the portfolio project without asserting an available software release.

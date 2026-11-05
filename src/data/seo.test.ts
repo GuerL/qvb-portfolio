@@ -37,3 +37,13 @@ test('structured data uses verified profiles and does not claim public software 
   }
   assert.equal(serializeJsonLd({ name: '</script>' }).includes('</script>'), false);
 });
+
+test('GRYD shares floor-planning metadata across search and social tags', () => {
+  const seo = metadata('/projects/gryd');
+  assert.equal(seo.title, 'GRYD — 2D & 3D Floor Planning | qvb.dev');
+  assert.equal(seo.description, 'GRYD is a 2D and 3D floor-planning application for iPhone and iPad. Design with Apple Pencil or touch, furnish rooms, and explore interactive 3D spaces.');
+  const tags = Object.fromEntries(metaEntries(seo).map(([, key, value]) => [key, value]));
+  for (const key of ['og:title', 'twitter:title']) assert.equal(tags[key], seo.title);
+  for (const key of ['description', 'og:description', 'twitter:description']) assert.equal(tags[key], seo.description);
+  assert.equal(seo.jsonLd['@graph'][0].description, projects.find(project => project.id === 'gryd')!.description);
+});
