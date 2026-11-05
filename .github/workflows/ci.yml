@@ -15,6 +15,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint && npm test && npm run build
+      - run: CHECK_ANALYTICS_BUILD=1 node --test scripts/analytics.test.mjs
       - run: npx playwright install --with-deps chromium
       - run: docker compose config --quiet
       - run: docker build -t qvb-portfolio:test .
@@ -32,4 +33,5 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18080/assets/missing.js)" = 404
           curl -fsS http://127.0.0.1:18080/sitemap.xml | grep -q 'bifrost'
           PORTFOLIO_PREVIEW_URL=http://127.0.0.1:18080 node scripts/cache-check.mjs
+          PORTFOLIO_PREVIEW_URL=http://127.0.0.1:18080 node --test scripts/analytics.test.mjs
           PORTFOLIO_PREVIEW_URL=http://127.0.0.1:18080 node scripts/deployment-check.mjs
