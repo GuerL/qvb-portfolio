@@ -31,3 +31,5 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18080/missing)" = 404
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18080/assets/missing.js)" = 404
           curl -fsS http://127.0.0.1:18080/sitemap.xml | grep -q 'bifrost'
+          PORTFOLIO_PREVIEW_URL=http://127.0.0.1:18080 node scripts/cache-check.mjs
+          PORTFOLIO_PREVIEW_URL=http://127.0.0.1:18080 node scripts/deployment-check.mjs

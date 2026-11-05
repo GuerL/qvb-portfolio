@@ -78,6 +78,9 @@ Vite copies `public/` into `dist/`; Docker copies all of `dist/` into Nginx. Reb
 
 ## Production and existing deployment
 
+See [deployment caching](deploy/CACHING.md) for HTTP policies, safe open-tab updates,
+Cloudflare dashboard settings, and production cache verification commands.
+
 The current `compose.yaml` has service `portfolio`, fixed container name `qvb-portfolio`, network alias `qvb-portfolio`, and host mapping **8085 → 8080**. These existing settings are preserved to avoid breaking your deployed origin. It joins external **apps-network**, uses a read-only runtime, bounded logs, `unless-stopped`, an unprivileged Nginx image and `/healthz`.
 
 The SEO canonical origin is fixed to `https://qvb.dev` in `src/data/seo.ts`, including preview builds. The existing `VITE_SITE_URL` build argument is retained for infrastructure compatibility; it does not override SEO URLs. See [SEO.md](SEO.md) for the audit, rendering approach, validation and deployment checks.
